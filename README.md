@@ -74,5 +74,5 @@ $(element).docwrite(" correctly</div>');" + "</scr"+"ipt><div>");
 $(element).docwrite('nezhdanchik</div>');
 ```
  
-Initial release from Slando (http://www.slando.com) Development team. (http://plugins.jquery.com/content/docwrite-100)
+Initial release from Slando (http://www.slando.com) Development team. (http://plugins.jquery.com/content/docwrite-100)  
 Modified by m8rge
