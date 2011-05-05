@@ -8,6 +8,24 @@
  * Date: Thu Feb 24 11:32:37 GMT 2011
  */
 
+/*!
+ * docwrite jQuery plugin v1.1.0
+ *
+ * Modified by m8rge
+ * Added ability to process splitted nesteds scripts
+ *
+ * Examples:
+ * $(element).docwrite("<script type='text/javascript' ");
+ * $(element).docwrite("src='alert.js'></scr"+"ipt>");
+ *
+ * $(element).docwrite("<div>Appended to element</div>" + "<script type='text/javascript'>" + "m='<div>nested '; document.write(m+'");
+ * $(element).docwrite("document.write()s are handled");
+ * $(element).docwrite(" correctly</div>');" + "</scr"+"ipt>");
+ * $(element).docwrite('nezhdanchik');
+ *
+ * Date: May 04 18:00 GMT+5 2011
+ */
+
 /**
  * @fileOverview
  * Make document.write() a little bit safer
@@ -38,11 +56,12 @@
  */
 (function($) {
 
-     var match_script     = /<script ([^>]*)>/i,
+     var match_script     = /<script /i,
          match_script_src = /^<script ([^>]* )?src=/i,
          match_script_end = /<\/script>/i,
          document_write   = document.write,
-         write_target     = undefined;
+         write_target     = undefined,
+		 script_buffer    = [];
 
      // document.write() implementation before the ready event has fired:
      function write(html) {
@@ -121,7 +140,7 @@
           *
           */
          document.write = function write_inner(text) {
-
+//			 console.log("have text:",text);
              var start_pos,
                  end_pos; // needs to be a local variable because this is called recursively
 
@@ -132,21 +151,47 @@
 
                  if ( match_script_src.test( text ) ) {
                      // <script src="...">: remove the "<script" and continue parsing:
-                     html.push( text.substr(0, start_pos + 7) );
+					 script_buffer.push( text.substr(0, start_pos + 7) );
                      text     = text.substr(   start_pos + 7);
                  } else if ( -1 == ( end_pos = text.search(match_script_end) ) ) {
                      // <script> with no </script>:
-                     html.push( text );
+					 var tmp = text.substr(start_pos);
+					 start_pos = tmp.indexOf( '>', start_pos ) + 1;
+					 script_buffer.push(tmp.substr(start_pos));
+//					 console.log(html, script_buffer);
                      return;
                  } else {
                      // <script>...</script>, may do a document.write() of its own:
                      start_pos = text.indexOf( '>', start_pos ) + 1;
                      $.globalEval( text.substr(start_pos, end_pos - start_pos) );
                      text = text.substr(end_pos + 9);
-                 };
-             };
+                 }
+             }
+			 if ( script_buffer.length != 0 &&
+					 -1 != ( end_pos = text.search(match_script_end) )) {
+				 // script buffer have full script
+//				 console.log('have script');
 
-             html.push( text );
+				 script_buffer.push(text.substr(0, end_pos)); // append last segment
+				 if (match_script_src.test( script_buffer.join('')+text.substr(end_pos, end_pos+9) )) {
+				 	 // we have <script src=, so just insert as text
+					 script_buffer.push(text.substr(end_pos, end_pos+9)); // append </script> tag
+					 html = html.concat(script_buffer);
+					 script_buffer = [];
+				 } else {
+				    // we have <script tag, eval it
+					var local_script = script_buffer.join('');
+				 	script_buffer = [];
+				 	$.globalEval(local_script);
+				 }
+				 text = text.substr(end_pos + 9);
+			 }
+
+			 if (script_buffer.length != 0)
+			 	script_buffer.push(text);
+			 else
+			 	html.push( text );
+//			 console.log(html, script_buffer);
          };
          document.writeln = function(html) { write_inner(html + "\n"); };
 
