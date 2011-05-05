@@ -3,7 +3,7 @@
     <title>Docwrite example</title>
 
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.pack.js"></script>
-    <script type="text/javascript" src="jquery.docwrite.1.0.0.min.js"></script>
+    <script type="text/javascript" src="jquery.docwrite.1.1.0.js"></script>
 
   </head>
   <body>
@@ -12,6 +12,7 @@
     <div id="example1_element"></div>
     <div id="example2_element"></div>
     <div id="example3_element"></div>
+    <div id="example4_element"></div>
 
 <script type="text/javascript"><!--
 var element = document.getElementById('example1_element');
@@ -38,14 +39,14 @@ $(document).bind('afterdocwrite', function(event, data) {
 <script><!--
 
 $(element).docwrite( function(arg1, arg2) {
-    document.write("my <b>html</b> will be appended to $(element)");
+    document.write("my <b>html</b> will be appended to $(element1)");
 }, "passed to function as arg1",
    "passed to function as arg2"
 );
 
 element = document.getElementById('example2_element');
 $(element).docwrite(
-    "<div>Appended to element</div>\n" +
+    "<div>Appended to element2</div>\n" +
     "<script type='text/javascript'>" +
         "document.write('nested document.write()s are handled correctly');" +
     "</script>"
@@ -60,6 +61,19 @@ $(window).load( function() {
 });
 
 $(element).docwrite( "will not trigger an event" );
+//--></script>
+
+<script><!--
+
+element = document.getElementById('example4_element');
+$(element).docwrite(
+		"<script type='text/javascript' ");
+$(element).docwrite(
+		"src='alert.js'></scr"+"ipt>");
+$(element).docwrite("<div>Appended to element4</div>" + "<script type='text/javascript'>" + "m='<div>nested '; document.write(m+'");
+$(element).docwrite("document.write()s are handled");
+$(element).docwrite(" correctly</div>');" + "</scr"+"ipt><div>");
+$(element).docwrite('nezhdanchik</div>');
 //--></script>
 
   </body>
