@@ -62,4 +62,17 @@ $(window).load(function() {
 $(element).docwrite( "will not trigger an event" );
 ```
 
+1.1.0. Added ability to process splitted nesteds scripts
+
+```js
+$(element).docwrite("<script type='text/javascript' ");
+$(element).docwrite("src='alert.js'></scr"+"ipt>");
+
+$(element).docwrite("<div>Appended to element</div>" + "<script type='text/javascript'>" + "m='<div>nested '; document.write(m+'");
+$(element).docwrite("document.write()s are handled");
+$(element).docwrite(" correctly</div>');" + "</scr"+"ipt><div>");
+$(element).docwrite('nezhdanchik</div>');
+```
+ 
 Initial release from Slando (http://www.slando.com) Development team. (http://plugins.jquery.com/content/docwrite-100)
+Modified by m8rge
