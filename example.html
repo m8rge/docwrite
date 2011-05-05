@@ -1,0 +1,66 @@
+<html>
+  <head>
+    <title>Docwrite example</title>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.pack.js"></script>
+    <script type="text/javascript" src="jquery.docwrite.1.0.0.min.js"></script>
+
+  </head>
+  <body>
+    <h1>Docwrite example</h1>
+
+    <div id="example1_element"></div>
+    <div id="example2_element"></div>
+    <div id="example3_element"></div>
+
+<script type="text/javascript"><!--
+var element = document.getElementById('example1_element');
+
+$(document).bind('beforedocwrite', function(event, data) {
+    // redirect the write:
+    data.target = $('#my_element');
+    // Edit what will be written:
+    if ( /pattern/.test( data.html ) ) {
+        data.html = "you can change the text <i>however you like</i>";
+    };
+
+    // Cancel writing:
+    if ( !confirm("Should we write this:\n" + data.html) )
+        event.preventDefault();
+});
+
+$(document).bind('afterdocwrite', function(event, data) {
+    alert("'" + data.html + "' was written to " + data.target);
+});
+
+//--></script>
+
+<script><!--
+
+$(element).docwrite( function(arg1, arg2) {
+    document.write("my <b>html</b> will be appended to $(element)");
+}, "passed to function as arg1",
+   "passed to function as arg2"
+);
+
+element = document.getElementById('example2_element');
+$(element).docwrite(
+    "<div>Appended to element</div>\n" +
+    "<script type='text/javascript'>" +
+        "document.write('nested document.write()s are handled correctly');" +
+    "</script>"
+);
+//--></script>
+
+<script><!--
+
+element = document.getElementById('example3_element');
+$(window).load( function() {
+    document.write("will trigger an event (and be appended to a hidden <div>)");
+});
+
+$(element).docwrite( "will not trigger an event" );
+//--></script>
+
+  </body>
+</html>
