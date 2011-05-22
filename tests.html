@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" type="text/css" media="screen" />
+    <script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
+    <script type="text/javascript" src="jquery.docwrite.1.2.0.js"></script>
+
+    <script>
+        $(document).bind('beforedocwrite', function(event, data) {
+            data.target = $('#event-interface-target');
+            switch ( data.html ) {
+            case 'change target': break;
+            case 'edit text'    : data.html = "edited text"; break;
+            case 'cancel'       : event.preventDefault(); break;
+            };
+        });
+
+        var last_afterdocwrite_data;
+        $(document).bind('afterdocwrite', function(event, data) {
+                last_afterdocwrite_data = data;
+        });
+
+    </script>
+
+  </head>
+  <body>
+    <h1 id="qunit-header">jQuery.docwrite.js</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+    <div id="qunit-fixture">
+
+            <div id="event-interface-target"></div>
+            <div id="functional-interface-target"></div>
+
+    </div>
+
+     <script>
+
+        module("Event-based interface");
+
+        test( "change target", function() {
+            var result_text = "change target";
+            document.write(result_text);
+            equals( $('#event-interface-target').text(), result_text, "document.write() target changed" );
+            notStrictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() is called" );
+            equals( last_afterdocwrite_data.html, result_text, "afterdocwrite() gets the right HTML" );
+            last_afterdocwrite_data = undefined;
+        });
+
+        test( "edit text", function() {
+            var result_text = "edited text";
+            document.write(   "edit text");
+            equals( $('#event-interface-target').text(), result_text, "document.write() text edited" );
+            notStrictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() is called" );
+            equals( last_afterdocwrite_data.html, result_text, "afterdocwrite() gets the right HTML" );
+            last_afterdocwrite_data = undefined;
+        });
+
+        test( "cancel", function() {
+            var result_text = "";
+            document.write(   "cancel");
+            equals( $('#event-interface-target').text(), result_text, "document.write() cancelled" );
+            equals( last_afterdocwrite_data, undefined, "afterdocwrite() was not called" );
+            last_afterdocwrite_data = undefined;
+        });
+
+
+
+        module("Functional interface");
+
+        test( "change target", function() {
+            var result_text = "change target";
+            $('#functional-interface-target').docwrite(result_text);
+            equals( $('#functional-interface-target').text(), result_text, "document.write() target not changed" );
+            strictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() was not called" );
+            last_afterdocwrite_data = undefined;
+        });
+
+        test( "edit text", function() {
+            var result_text                          = "edit text";
+            $('#functional-interface-target').docwrite("edit text");
+            equals( $('#functional-interface-target').text(), result_text, "document.write() text not edited" );
+            strictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() was not called" );
+            last_afterdocwrite_data = undefined;
+        });
+
+        test( "cancel", function() {
+            var result_text                          = "cancel";
+            $('#functional-interface-target').docwrite("cancel");
+            equals( $('#functional-interface-target').text(), result_text, "document.write() not cancelled" );
+            strictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() was not called" );
+            last_afterdocwrite_data = undefined;
+        });
+
+        test( "pass arguments", function() {
+            $('#functional-interface-target').docwrite(function(arg) { document.write(arg); }, "argument passed" );
+            equals( $('#functional-interface-target').text(), "argument passed", "argument passed to function" );
+            strictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() was not called" );
+            last_afterdocwrite_data = undefined;
+        });
+
+
+
+        module("Complex document.write() examples");
+
+        test( "nested document.write", function() {
+            $('#functional-interface-target').docwrite(function(arg) {
+                    document.write("this is a ");
+                    document.write('<script type="text/javascript">document.write("nested ");</scr'+'ipt>');
+                    document.write("document.write()");
+                });
+            equals( $('#functional-interface-target').text(), "this is a nested document.write()", "correct output" );
+            strictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() was not called" );
+            last_afterdocwrite_data = undefined;
+        });
+
+        test( "silly formatting issues", function() {
+            $('#functional-interface-target').docwrite(function(arg) {
+                    document.write("this is a ");
+                    document.write('<script\t\n type\t\n =\t\n "text/javascript"\t\n >document.write("nested");</scr'+'ipt\t\n >');
+                    document.write(" document.write()");
+                });
+            equals( $('#functional-interface-target').text(), "this is a nested document.write()", "correct output" );
+            strictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() was not called" );
+            last_afterdocwrite_data = undefined;
+        });
+
+        test( "document.write() loading a file", function() {
+            $('#functional-interface-target').docwrite(function(arg) {
+                    document.write('<script type="text/javascript" src="nested_docwrite_test.js"></scr'+'ipt>');
+                });
+            equals( $('#functional-interface-target').text(), "", "correct output" );
+            notStrictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() is called" );
+            equals( last_afterdocwrite_data.html, "(nested document.write() loaded from file)", "afterdocwrite() gets the right HTML" );
+            last_afterdocwrite_data = undefined;
+        });
+
+        test( "split document.write", function() {
+            $('#functional-interface-target').docwrite(function(arg) {
+
+                    document.write( "<script type='text/javascript' " );
+                    document.write( "src='nested_docwrite_test.js'></scr"+"ipt>");
+                    document.write( "(inline text) " +
+                                    "<script type='text/javascript'>" + "m='(nested document'; document.write(m+'");
+                    document.write( ".write()");
+                    document.write( ") ');" + "</scr"+"ipt>(");
+                    document.write('more inline text)');
+
+                });
+            equals( $('#functional-interface-target').text(), "(inline text) (nested document.write()) (more inline text)", "correct output" );
+            notStrictEqual( last_afterdocwrite_data, undefined, "afterdocwrite() is called" );
+            equals( last_afterdocwrite_data.html, "(nested document.write() loaded from file)", "afterdocwrite() gets the right HTML" );
+            last_afterdocwrite_data = undefined;
+        });
+
+     </script>
+
+  </body>
+</html>
