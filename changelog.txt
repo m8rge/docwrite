@@ -1,0 +1,17 @@
+Docwrite
+
+Version 1.2.0
+=============
+* Reformatted m8rge's changes slightly
+* Added unit tests
+* Fixed several parsing issues
+
+Version 1.1.0
+=============
+* Modified by m8rge
+* Added ability to process splitted nesteds scripts
+* See https://github.com/m8rge/docwrite
+
+Version 1.0.0
+=============
+* Initial release from the Slando (http://www.slando.com) Development team.
