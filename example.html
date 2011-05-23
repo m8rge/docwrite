@@ -3,7 +3,7 @@
     <title>Docwrite example</title>
 
     <script type="text/javascript" src="http://code.jquery.com/jquery-latest.pack.js"></script>
-    <script type="text/javascript" src="jquery.docwrite.1.1.0.js"></script>
+    <script type="text/javascript" src="jquery.docwrite.1.2.0.min.js"></script>
 
   </head>
   <body>
@@ -15,8 +15,6 @@
     <div id="example4_element"></div>
 
 <script type="text/javascript"><!--
-var element = document.getElementById('example1_element');
-
 $(document).bind('beforedocwrite', function(event, data) {
     // redirect the write:
     data.target = $('#my_element');
@@ -38,15 +36,16 @@ $(document).bind('afterdocwrite', function(event, data) {
 
 <script><!--
 
+var element = document.getElementById('example1_element');
 $(element).docwrite( function(arg1, arg2) {
-    document.write("my <b>html</b> will be appended to $(element1)");
+    document.write("my <b>html</b> will be appended to $(element)");
 }, "passed to function as arg1",
    "passed to function as arg2"
 );
 
 element = document.getElementById('example2_element');
 $(element).docwrite(
-    "<div>Appended to element2</div>\n" +
+    "<div>Appended to element</div>\n" +
     "<script type='text/javascript'>" +
         "document.write('nested document.write()s are handled correctly');" +
     "</script>"

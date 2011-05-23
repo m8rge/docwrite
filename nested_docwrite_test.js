@@ -1,0 +1,1 @@
+document.write("(nested document.write() loaded from file)");
